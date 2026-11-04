@@ -66,6 +66,7 @@ test('Ode to Joy: repeats, ties, chords, dotted notes, rests, tempo, metadata', 
   assert.equal(song.tempo, 100);
   assert.deepEqual(song.tempos, [{ time: 0, bpm: 100 }]);
   assert.deepEqual(measureOrder(song), [1, 2, 3, 4, 1, 2, 3, 5]);
+  assert.deepEqual(song.measures.map((m) => m.index), [0, 1, 2, 3, 0, 1, 2, 4]); // written position
   assert.equal(song.duration, 19.2); // 8 bars × 4 beats × 0.6 s
   assert.equal(song.notes.length, 49);
 
@@ -91,7 +92,7 @@ test('the committed songs/ode-to-joy.json is up to date', async () => {
   try {
     await mkdirCopy(ODE, dir);
     await convertAll({ srcDir: path.join(dir, 'src'), outDir: path.join(dir, 'out'), log: quiet });
-    for (const file of ['ode-to-joy.json', 'index.json']) {
+    for (const file of ['ode-to-joy.json', 'ode-to-joy.musicxml', 'index.json']) {
       assert.equal(
         await readFile(path.join(dir, 'out', file), 'utf8'),
         await readFile(path.join(ROOT, 'songs', file), 'utf8'),
@@ -356,6 +357,9 @@ test('reads compressed .mxl files and sidecar metadata; writes index.json sorted
     ]);
     const scale = JSON.parse(await readFile(path.join(dir, 'out', 'scale.json'), 'utf8'));
     assert.equal(scale.notes.length, 4);
+    // The sheet-music view gets the score unzipped, next to the JSON.
+    assert.equal(scale.score, 'scale.musicxml');
+    assert.equal(await readFile(path.join(dir, 'out', 'scale.musicxml'), 'utf8'), xml);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
@@ -374,7 +378,7 @@ test('a broken file is reported and index.json is left alone', async () => {
     });
     assert.deepEqual(result, { converted: 1, failed: 1 });
     assert.ok(errors[0].startsWith('✗ broken.musicxml'));
-    assert.deepEqual(await readdir(path.join(dir, 'out')), ['ode-to-joy.json']);
+    assert.deepEqual((await readdir(path.join(dir, 'out'))).sort(), ['ode-to-joy.json', 'ode-to-joy.musicxml']);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

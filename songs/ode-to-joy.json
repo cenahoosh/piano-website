@@ -3,6 +3,7 @@
   "composer": "لودویگ فان بتهوون",
   "level": 1,
   "source": "ode-to-joy.musicxml",
+  "score": "ode-to-joy.musicxml",
   "duration": 19.2,
   "tempo": 100,
   "timeSignature": "4/4",
@@ -10,14 +11,14 @@
     {"time":0,"bpm":100}
   ],
   "measures": [
-    {"number":1,"time":0,"timeSignature":"4/4"},
-    {"number":2,"time":2.4,"timeSignature":"4/4"},
-    {"number":3,"time":4.8,"timeSignature":"4/4"},
-    {"number":4,"time":7.2,"timeSignature":"4/4"},
-    {"number":1,"time":9.6,"timeSignature":"4/4"},
-    {"number":2,"time":12,"timeSignature":"4/4"},
-    {"number":3,"time":14.4,"timeSignature":"4/4"},
-    {"number":5,"time":16.8,"timeSignature":"4/4"}
+    {"number":1,"index":0,"time":0,"timeSignature":"4/4"},
+    {"number":2,"index":1,"time":2.4,"timeSignature":"4/4"},
+    {"number":3,"index":2,"time":4.8,"timeSignature":"4/4"},
+    {"number":4,"index":3,"time":7.2,"timeSignature":"4/4"},
+    {"number":1,"index":0,"time":9.6,"timeSignature":"4/4"},
+    {"number":2,"index":1,"time":12,"timeSignature":"4/4"},
+    {"number":3,"index":2,"time":14.4,"timeSignature":"4/4"},
+    {"number":5,"index":4,"time":16.8,"timeSignature":"4/4"}
   ],
   "notes": [
     {"note":"C3","time":0,"duration":2.4,"hand":"left","velocity":0.63,"measure":1,"beat":1},

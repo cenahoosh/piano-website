@@ -68,6 +68,49 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Narrow phones: the score and the falling notes both show measure numbers. */
+@media (max-width: 479px) {
+  .player__position {
+    display: none;
+  }
+}
+
+/* ── Sheet / waterfall switch ────────────────────────────────────── */
+
+.view-switch {
+  display: flex;
+  flex: none;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--ebony);
+}
+
+.view-switch__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.view-switch__option svg {
+  width: 18px;
+  height: 18px;
+}
+
+.view-switch__option[aria-pressed='true'] {
+  background: var(--ivory);
+  color: var(--ebony);
+}
+
 /* ── Toolbar ─────────────────────────────────────────────────────── */
 
 .toolbar {
@@ -148,6 +191,7 @@
   color: #fff;
   font-size: 0.9rem;
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
   touch-action: manipulation;
 }
@@ -264,6 +308,83 @@
   background: linear-gradient(to bottom, var(--lacquer), #1d110d 70%);
 }
 
+/* The stage shows one of the two views. */
+.stage[data-view='sheet'] canvas,
+.stage[data-view='waterfall'] .sheet {
+  display: none;
+}
+
+/* ── Sheet music: ivory paper on the music desk ──────────────────── */
+
+.sheet {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--ivory);
+  color: var(--ebony);
+  box-shadow: inset 0 -10px 12px -10px rgb(0 0 0 / 0.35);
+}
+
+.sheet__status {
+  margin: 0;
+  padding: 24px var(--gutter);
+  color: #6b5a4c;
+  text-align: center;
+}
+
+.sheet__page {
+  position: relative;
+  margin: 0 6px;
+  cursor: pointer;
+}
+
+.sheet__score svg {
+  display: block;
+}
+
+/* Loop range, current measure and cursor sit under/over the notes. */
+.sheet__loop-measure,
+.sheet__measure,
+.sheet__cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.sheet__loop-measure {
+  background: rgb(205 166 90 / 0.22);
+}
+
+.sheet__measure {
+  border-radius: 4px;
+  background: rgb(23 17 14 / 0.05);
+}
+
+.sheet__cursor {
+  z-index: 1;
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--brass-deep);
+  opacity: 0.85;
+}
+
+/* Sounding notes take their hand's colour (overrides VexFlow's fill attributes). */
+.sheet .is-right path,
+.sheet .is-right rect {
+  fill: var(--hand-right);
+  stroke: var(--hand-right);
+}
+
+.sheet .is-left path,
+.sheet .is-left rect {
+  fill: var(--hand-left);
+  stroke: var(--hand-left);
+}
+
 .stage canvas {
   position: absolute;
   inset: 0;
@@ -289,6 +410,20 @@
   .player__composer,
   .player__position {
     display: none;
+  }
+
+  /* Icons only; the labels stay for screen readers. */
+  .view-switch__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .view-switch__option {
+    padding: 0 10px;
   }
 
   .toolbar {

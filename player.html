@@ -24,6 +24,16 @@
           <p class="player__composer" id="song-composer"></p>
         </div>
         <p class="player__position" id="position" aria-live="off"></p>
+        <div class="view-switch" role="group" aria-label="نوع نمایش">
+          <button type="button" class="view-switch__option" id="view-sheet" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M3 11h18M3 15h18" stroke="currentColor" stroke-width="1.4"/><ellipse cx="9" cy="15" rx="2.6" ry="2" transform="rotate(-20 9 15)" fill="currentColor"/><path d="M11.3 14.3V4.5" stroke="currentColor" stroke-width="1.6"/></svg>
+            <span class="view-switch__label">نت‌خوانی</span>
+          </button>
+          <button type="button" class="view-switch__option" id="view-waterfall" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="4" height="9" rx="1.5" fill="currentColor"/><rect x="10" y="7" width="4" height="12" rx="1.5" fill="currentColor"/><rect x="16" y="2" width="4" height="7" rx="1.5" fill="currentColor"/><path d="M2 21h20" stroke="currentColor" stroke-width="1.6"/></svg>
+            <span class="view-switch__label">آبشار</span>
+          </button>
+        </div>
       </header>
 
       <div class="toolbar" role="toolbar" aria-label="کنترل پخش">

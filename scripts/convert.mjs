@@ -4,8 +4,9 @@
 //   node scripts/convert.mjs
 //
 // Reads every .musicxml / .xml / .mxl file in songs-src/ and writes:
-//   songs/<name>.json   one file per song (see "Output" below)
-//   songs/index.json    [{ id, file, title, composer, level, duration }]
+//   songs/<name>.json      one file per song (see "Output" below)
+//   songs/<name>.musicxml  the score itself (unzipped), for the sheet-music view
+//   songs/index.json       [{ id, file, title, composer, level, duration }]
 //
 // No dependencies: runs on a plain Node.js (18+) install.
 //
@@ -28,12 +29,15 @@
 //             also override "title" and "composer".
 //
 // Output (songs/<name>.json)
-//   { title, composer, level, source, duration, tempo, timeSignature,
+//   { title, composer, level, source, score, duration, tempo, timeSignature,
 //     tempos:   [{ time, bpm }],
-//     measures: [{ number, time, timeSignature }],     // in playing order
+//     measures: [{ number, index, time, timeSignature }],   // in playing order
 //     notes:    [{ note, time, duration, hand, velocity, measure, beat }] }
 //   - time / duration in seconds at the written tempo.
 //   - measure: the measure number printed in the score (repeats repeat it).
+//   - measures[].index: 0-based position of that measure in the written score,
+//     so a repeated measure points back to the same printed measure.
+//   - score: file name of the score copy next to the JSON.
 //   - beat: 1-based position in the measure, counted in the time signature's
 //     beat unit (quarters in 4/4, eighths in 6/8). 2.5 = halfway through beat 2.
 
@@ -748,6 +752,7 @@ export function convertMusicXml(xml, { source = 'score.musicxml', meta = {} } = 
     tempos: clock.points.map((p) => ({ time: round(p.sec), bpm: round(p.bpm, 2) })),
     measures: instances.map(({ m, start }) => ({
       number: measureNumber(m.number, m.index + 1),
+      index: m.index,
       time: round(clock.seconds(start)),
       timeSignature: m.time.label,
     })),
@@ -808,7 +813,10 @@ export async function convertAll({ srcDir = path.join(ROOT, 'songs-src'), outDir
       const fullPath = path.join(srcDir, file);
       const [xml, meta] = await Promise.all([readScoreText(fullPath), readSidecar(fullPath)]);
       const { song, warnings } = convertMusicXml(xml, { source: file, meta });
-      await writeFile(path.join(outDir, `${id}.json`), formatSong(song));
+      const { title, composer, level, source, ...rest } = song;
+      const output = { title, composer, level, source, score: `${id}.musicxml`, ...rest };
+      await writeFile(path.join(outDir, `${id}.json`), formatSong(output));
+      await writeFile(path.join(outDir, `${id}.musicxml`), xml);
       index.push({ id, file: `${id}.json`, title: song.title, composer: song.composer, level: song.level, duration: song.duration });
       log.log(`✓ ${file} → songs/${id}.json  (${song.notes.length} notes, ${song.measures.length} measures, ${song.duration} s)`);
       for (const w of warnings) log.log(`    ⚠ ${w}`);

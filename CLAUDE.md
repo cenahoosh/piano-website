@@ -22,11 +22,12 @@ A Persian-language piano tutorial website where a teacher publishes songs for st
 - Playback uses the **Tone.js** `Sampler` with the **Salamander Grand Piano** samples.
 - Samples and the Tone.js library are **self-hosted** in `/assets/piano/` (and alongside it as needed). Do **not** load audio or Tone.js from a CDN: the site must work for students in Iran, where many CDNs are blocked or unreliable.
 - Audio can only start after a user gesture (tap/click) — call `Tone.start()` from a button handler.
+- Sheet music is drawn by **OpenSheetMusicDisplay**, also self-hosted (`js/vendor/opensheetmusicdisplay.min.js`, loaded only by the player).
 
 ## Songs pipeline
 
 1. The teacher writes each song in **MuseScore** and exports it as **MusicXML** (`.musicxml` or compressed `.mxl`) into `/songs-src/`.
-2. `node scripts/convert.mjs` converts every file into `/songs/<name>.json` and writes `/songs/index.json` (`[{ id, file, title, composer, level, duration }]`). Commit the generated JSON — the site has no build step. Tests: `node --test scripts/convert.test.mjs` (they also fail if the committed JSON is stale).
+2. `node scripts/convert.mjs` converts every file into `/songs/<name>.json` (plus `/songs/<name>.musicxml`, the unzipped score for the sheet view) and writes `/songs/index.json` (`[{ id, file, title, composer, level, duration }]`). Commit the generated JSON — the site has no build step. Tests: `node --test scripts/convert.test.mjs` (they also fail if the committed JSON is stale).
 3. Each note in the JSON has the shape:
 
    ```json
@@ -39,7 +40,7 @@ A Persian-language piano tutorial website where a teacher publishes songs for st
    - `velocity`: 0–1, from the score's dynamics (mf ≈ 0.63 when none are marked).
    - `measure`: the measure number printed in the score; `beat`: 1-based, in the time signature's beat unit (2.5 = halfway through beat 2).
 4. Hand assignment comes from the MusicXML staff: **staff 1 = right hand**, **staff 2 = left hand**.
-5. A song file also has `title`, `composer`, `level`, `duration`, `tempo`, `timeSignature`, `tempos` and `measures` (start time of each measure in playing order). Title and composer come from MuseScore's score properties; `level` comes from an optional sidecar `songs-src/<name>.meta.json` such as `{ "level": 2 }` (which may also override `title` / `composer`).
+5. A song file also has `title`, `composer`, `level`, `score`, `duration`, `tempo`, `timeSignature`, `tempos` and `measures` (in playing order: printed `number`, `index` = position in the written score, start `time`). Title and composer come from MuseScore's score properties; `level` comes from an optional sidecar `songs-src/<name>.meta.json` such as `{ "level": 2 }` (which may also override `title` / `composer`).
 
 ## Visual conventions
 
@@ -56,7 +57,7 @@ A Persian-language piano tutorial website where a teacher publishes songs for st
 ## Pages
 
 - `index.html` — catalog of the songs in `songs/index.json` (title, composer, level, duration, a button to the player).
-- `player.html?song=<name>` — falling-notes practice view for `songs/<name>.json` (without a song it redirects to the catalog). Sound and animation share one clock: the Tone.js Transport, with bpm = 60 × speed so one Transport beat is one song-second (`js/song-player.js`); the canvas (`js/falling-notes.js`) reads the Transport's ticks every frame.
+- `player.html?song=<name>` — practice view for `songs/<name>.json` (without a song it redirects to the catalog). Above the keyboard it shows either the **sheet music** for sight reading (`js/sheet-view.js`: the score with a cursor, sounding notes coloured by hand, auto-scroll, tap a measure to jump there) or the **waterfall** of falling notes (`js/falling-notes.js`); a switch in the header toggles them and the choice is remembered. Sound and both views share one clock: the Tone.js Transport, with bpm = 60 × speed so one Transport beat is one song-second (`js/song-player.js`); the views read the Transport's ticks every frame.
 - `keyboard.html` — keyboard and sound demo.
 
 ## Directory layout

@@ -1,9 +1,10 @@
-// player.html?song=<name> — falling-notes practice view.
-// Without a song it goes to the catalog (index.html).
+// player.html?song=<name> — practice view: the sheet music (sight reading) or the
+// falling notes (waterfall) above the keyboard. Without a song it goes to the catalog.
 
 import * as piano from './piano.js';
 import { createKeyboard } from './keyboard.js';
 import { createFallingNotes } from './falling-notes.js';
+import { createSheetView } from './sheet-view.js';
 import { createSongPlayer, LEAD_IN } from './song-player.js';
 import { setupStartOverlay } from './start-overlay.js';
 import { MIDDLE_C, noteToMidi, toPersianDigits } from './notes.js';
@@ -44,15 +45,24 @@ async function showPlayer(id) {
   $('song-title').textContent = song.title;
   $('song-composer').textContent = song.composer ?? '';
 
-  // ── Canvas above the keyboard ─────────────────────────────────────
+  // ── Above the keyboard: sheet music or falling notes ─────────────
   const stage = document.createElement('div');
   stage.className = 'stage';
   const canvas = document.createElement('canvas');
   canvas.setAttribute('aria-label', 'نت‌هایی که روی کیبورد می‌افتند');
   canvas.setAttribute('role', 'img');
-  stage.append(canvas);
+  const sheetBox = document.createElement('div');
+  stage.append(sheetBox, canvas);
 
   const view = createFallingNotes(canvas, song);
+  const sheet = createSheetView(sheetBox, song, {
+    onSeek(measureIndex) {
+      player?.seek(song.measures[measureIndex].time);
+      requestFrame();
+    },
+    onLayout: () => requestFrame(),
+  });
+  sheet.setClock(() => currentTime());
   let player = null; // created once audio is unlocked
   const muted = { right: false, left: false };
 
@@ -76,10 +86,14 @@ async function showPlayer(id) {
     view.setLayout(keyboard.layout(canvas));
     requestFrame();
   }
-  new ResizeObserver(() => {
+  // Watch the canvas itself: it is hidden (0×0) while the sheet view is shown and
+  // must re-measure when it appears.
+  const resizeObserver = new ResizeObserver(() => {
     view.resize();
     updateLayout();
-  }).observe(stage);
+  });
+  resizeObserver.observe(stage);
+  resizeObserver.observe(canvas);
   view.resize();
 
   // Show the song's range of keys as large as the screen allows.
@@ -118,7 +132,8 @@ async function showPlayer(id) {
       updatePlayButton();
       now = currentTime();
     }
-    view.render(now, { muted, loop: player?.loop ?? null });
+    if (activeView === 'sheet') sheet.render(now, { loop: player?.loop ?? null });
+    else view.render(now, { muted, loop: player?.loop ?? null });
     syncKeys(now);
     updatePosition(now);
     if (player?.isPlaying || scrubbing) rafId = requestAnimationFrame(frame);
@@ -126,6 +141,36 @@ async function showPlayer(id) {
   function requestFrame() {
     if (!rafId) rafId = requestAnimationFrame(frame);
   }
+
+  // ── Sheet / waterfall switch (remembered on this device) ─────────
+  const VIEW_KEY = 'piano.practiceView';
+  let activeView = 'sheet';
+  try {
+    if (localStorage.getItem(VIEW_KEY) === 'waterfall') activeView = 'waterfall';
+  } catch {
+    // Storage blocked (private mode): start with the sheet.
+  }
+  function setView(name, { remember = true } = {}) {
+    activeView = name;
+    stage.dataset.view = name;
+    $('view-sheet').setAttribute('aria-pressed', String(name === 'sheet'));
+    $('view-waterfall').setAttribute('aria-pressed', String(name === 'waterfall'));
+    if (remember) {
+      try {
+        localStorage.setItem(VIEW_KEY, name);
+      } catch {
+        // Not remembered; nothing else depends on it.
+      }
+    }
+    requestFrame();
+  }
+  $('view-sheet').addEventListener('click', () => setView('sheet'));
+  $('view-waterfall').addEventListener('click', () => setView('waterfall'));
+  setView(activeView, { remember: false });
+  // A song without a usable score still works in the waterfall.
+  sheet.ready.then(requestFrame, () => {
+    if (activeView === 'sheet') setView('waterfall', { remember: false });
+  });
 
   // ── Toolbar ──────────────────────────────────────────────────────
   const playButton = $('play');
@@ -308,7 +353,7 @@ async function showPlayer(id) {
   requestFrame();
 
   // For automated checks and debugging in the console.
-  window.__player = { song, player, view, keyboard, redraw: requestFrame };
+  window.__player = { song, player, view, sheet, keyboard, redraw: requestFrame, setView };
 }
 
 const songId = new URLSearchParams(location.search).get('song');
