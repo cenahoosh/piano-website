@@ -87,15 +87,21 @@ test('Ode to Joy: repeats, ties, chords, dotted notes, rests, tempo, metadata', 
   assert.ok(!song.notes.some((x) => x.hand === 'left' && x.time > 18));
 });
 
-test('the committed songs/ode-to-joy.json is up to date', async () => {
+test('the committed songs/ match a fresh conversion of songs-src/', async () => {
+  // Converts every score (not just the sample), so it holds for any number of songs —
+  // and in the deploy, where the converter has just regenerated songs/.
   const dir = await mkdtemp(path.join(tmpdir(), 'songs-'));
   try {
-    await mkdirCopy(ODE, dir);
+    const { cp, readdir: list } = await import('node:fs/promises');
+    await cp(path.join(ROOT, 'songs-src'), path.join(dir, 'src'), { recursive: true });
     await convertAll({ srcDir: path.join(dir, 'src'), outDir: path.join(dir, 'out'), log: quiet });
-    for (const file of ['ode-to-joy.json', 'ode-to-joy.musicxml', 'index.json']) {
+    const generated = (await list(path.join(dir, 'out'))).sort();
+    const committed = (await list(path.join(ROOT, 'songs'))).filter((f) => !f.startsWith('.')).sort();
+    assert.deepEqual(committed, generated, 'songs/ has missing or extra files — run: node scripts/convert.mjs');
+    for (const file of generated) {
       assert.equal(
-        await readFile(path.join(dir, 'out', file), 'utf8'),
         await readFile(path.join(ROOT, 'songs', file), 'utf8'),
+        await readFile(path.join(dir, 'out', file), 'utf8'),
         `songs/${file} is stale — run: node scripts/convert.mjs`,
       );
     }
