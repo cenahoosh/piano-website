@@ -126,28 +126,48 @@ function prepare(note) {
  * @param {string} note       Scientific pitch name, e.g. "C4" or "F#3".
  * @param {number} duration   Seconds the key is held down.
  * @param {number} [time]     Audio-clock time to start (see `now()`); defaults to now.
- * @param {object} [options]  { velocity: 0–1 (default 0.8), hand: "right" | "left" }
+ * @param {object} [options]  { velocity: 0–1 (default 0.8), hand: "right" | "left",
+ *                              notify: false to skip the noteon/noteoff events }
  */
-export function playNote(note, duration, time, { velocity = 0.8, hand = 'right' } = {}) {
+export function playNote(note, duration, time, { velocity = 0.8, hand = 'right', notify = true } = {}) {
   if (!isReady()) return;
   const start = time ?? Tone.now();
   prepare(note);
   sampler.triggerAttackRelease(note, duration, start, velocity);
-  emit('noteon', note, hand, start);
-  emit('noteoff', note, hand, start + duration);
+  if (notify) {
+    emit('noteon', note, hand, start);
+    emit('noteoff', note, hand, start + duration);
+  }
+}
+
+/** Silence every sounding note (with its natural release). */
+export function releaseAll() {
+  sampler?.releaseAll();
+}
+
+/** The loaded Tone.js namespace (after `loadEngine()`), for transport scheduling. */
+export function getTone() {
+  return Tone;
+}
+
+/** Seconds between the audio clock and what actually comes out of the speaker. */
+export function outputLatency() {
+  const raw = Tone?.getContext().rawContext;
+  const latency = raw?.outputLatency || raw?.baseLatency || 0;
+  return Number.isFinite(latency) ? Math.min(latency, 0.5) : 0;
 }
 
 /** Press and hold a key (for live playing). Pair with noteOff. */
-export function noteOn(note, { velocity = 0.8, hand = 'right' } = {}) {
+export function noteOn(note, { velocity = 0.8, hand = 'right', notify = true } = {}) {
   if (!isReady()) return;
   prepare(note);
   sampler.triggerAttack(note, Tone.now(), velocity);
-  emit('noteon', note, hand);
+  if (notify) emit('noteon', note, hand);
 }
 
 /** Let go of a key started with noteOn. */
-export function noteOff(note, { hand = 'right' } = {}) {
+export function noteOff(note, { hand = 'right', notify = true } = {}) {
   if (!isReady()) return;
   sampler.triggerRelease(note, Tone.now());
-  emit('noteoff', note, hand);
+  if (notify) emit('noteoff', note, hand);
 }

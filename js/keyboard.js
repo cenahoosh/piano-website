@@ -6,6 +6,10 @@
 // });
 // kb.light('C4', 'right');  kb.unlight('C4');   // show which notes are sounding
 //
+// Options for the practice view:
+//   stage:        an element placed directly above the keys (e.g. the falling-notes canvas)
+//   onViewChange: called after the keys scroll, zoom or resize — re-read kb.layout()
+//
 // The keyboard always runs low → high, left → right, even on an RTL page.
 // Swiping across keys plays them (glissando), so scrolling is done with the
 // mini-map strip above the keys (or a trackpad / mouse wheel on desktop).
@@ -57,7 +61,10 @@ function buildKeys(container, { withLabels }) {
   return keys;
 }
 
-export function createKeyboard(root, { onKeyDown = () => {}, onKeyUp = () => {}, computerKeyboard = true } = {}) {
+export function createKeyboard(
+  root,
+  { onKeyDown = () => {}, onKeyUp = () => {}, computerKeyboard = true, stage = null, onViewChange = () => {} } = {},
+) {
   root.classList.add('keyboard');
   root.setAttribute('dir', 'ltr');
   root.innerHTML = '';
@@ -84,7 +91,9 @@ export function createKeyboard(root, { onKeyDown = () => {}, onKeyUp = () => {},
   const scroller = el('div', 'keyboard__scroller');
   const keysEl = el('div', 'keyboard__keys', { role: 'group', 'aria-label': 'کیبورد پیانو' });
   scroller.append(keysEl);
-  root.append(bar, scroller);
+  stage?.classList.add('keyboard__stage');
+  root.append(bar, ...(stage ? [stage] : []), scroller);
+  root.classList.toggle('keyboard--with-stage', Boolean(stage));
 
   const keys = buildKeys(keysEl, { withLabels: true });
   const miniKeys = buildKeys(mapKeys, { withLabels: false });
@@ -208,7 +217,18 @@ export function createKeyboard(root, { onKeyDown = () => {}, onKeyUp = () => {},
     if (keys.has(midi)) scrollToFraction(keyCenterFraction(midi), smooth ? 'smooth' : 'auto');
   }
 
+  let viewChangeQueued = false;
+  function notifyViewChange() {
+    if (viewChangeQueued) return;
+    viewChangeQueued = true;
+    requestAnimationFrame(() => {
+      viewChangeQueued = false;
+      onViewChange();
+    });
+  }
+
   function updateMap() {
+    notifyViewChange();
     const total = keysEl.offsetWidth;
     const view = scroller.clientWidth;
     const fits = total <= view + 1;
@@ -272,8 +292,7 @@ export function createKeyboard(root, { onKeyDown = () => {}, onKeyUp = () => {},
     scroller.scrollBy({ left: step * octave, behavior: 'smooth' });
   });
 
-  function setZoom(index) {
-    const keep = centerFraction ?? keyCenterFraction(MIDDLE_C);
+  function setZoom(index, keep = centerFraction ?? keyCenterFraction(MIDDLE_C)) {
     zoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, index));
     root.style.setProperty('--zoom', ZOOM_LEVELS[zoomIndex]);
     scrollToFraction(keep);
@@ -293,11 +312,49 @@ export function createKeyboard(root, { onKeyDown = () => {}, onKeyUp = () => {},
   centerOn(MIDDLE_C);
   updateMap();
 
+  /**
+   * Key positions for drawing on top of the keyboard, in CSS pixels relative to
+   * `relativeTo` (fractional, so bars line up exactly). Index by midi number.
+   */
+  function layout(relativeTo) {
+    const origin = relativeTo.getBoundingClientRect().left;
+    const x = new Float64Array(MIDI_MAX + 1);
+    const width = new Float64Array(MIDI_MAX + 1);
+    for (const [midi, key] of keys) {
+      const rect = key.getBoundingClientRect();
+      x[midi] = rect.left - origin;
+      width[midi] = rect.width;
+    }
+    return { x, width };
+  }
+
+  /** Zoom in as far as possible while low…high still fits, and centre on it. */
+  function fitRange(low, high) {
+    const lowKey = keys.get(Math.max(MIDI_MIN, low - (isBlack(low) ? 1 : 0)));
+    const highKey = keys.get(Math.min(MIDI_MAX, high + (isBlack(high) ? 1 : 0)));
+    const span = (highKey.offsetLeft + highKey.offsetWidth - lowKey.offsetLeft) / ZOOM_LEVELS[zoomIndex];
+    const view = scroller.clientWidth - 8;
+    let best = 0;
+    ZOOM_LEVELS.forEach((z, i) => {
+      if (span * z <= view && z <= 1) best = i;
+    });
+    zoomIndex = best;
+    root.style.setProperty('--zoom', ZOOM_LEVELS[best]);
+    const middle = (lowKey.offsetLeft + highKey.offsetLeft + highKey.offsetWidth) / 2 / keysEl.offsetWidth;
+    scrollToFraction(middle);
+    updateMap();
+  }
+
   return {
     light,
     unlight,
     clear,
     centerOn,
+    layout,
+    fitRange,
+    scrollBy(dx) {
+      scroller.scrollLeft += dx;
+    },
     destroy() {
       resizeObserver.disconnect();
       window.removeEventListener('keydown', onComputerKey);

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a1812" />
+    <title>تمرین پیانو</title>
+    <link rel="preload" href="assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/keyboard.css" />
+    <link rel="stylesheet" href="css/start.css" />
+    <link rel="stylesheet" href="css/player.css" />
+    <script type="module" src="js/player.js"></script>
+  </head>
+  <body>
+    <!-- Practice view: shown for player.html?song=<name> -->
+    <main class="player" id="player" hidden inert>
+      <header class="player__header">
+        <a class="player__back" href="player.html" aria-label="همه‌ی آهنگ‌ها">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <div class="player__heading">
+          <h1 class="player__title" id="song-title"></h1>
+          <p class="player__composer" id="song-composer"></p>
+        </div>
+        <p class="player__position" id="position" aria-live="off"></p>
+      </header>
+
+      <div class="toolbar" role="toolbar" aria-label="کنترل پخش">
+        <div class="toolbar__group">
+          <button type="button" class="tool tool--play" id="play" aria-label="پخش">
+            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>
+          </button>
+          <button type="button" class="tool" id="rewind" aria-label="برگشت به ابتدا">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.5v14H6zM19 5.5v13L9.5 12z" fill="currentColor"/></svg>
+          </button>
+          <button type="button" class="tool" id="metronome" aria-pressed="false" aria-label="مترونوم">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.2 3h5.6l3.7 17H5.5zM12 14.5l4.8-8.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"/><path d="M7.4 16h9.2" stroke="currentColor" stroke-width="1.9"/></svg>
+          </button>
+          <button type="button" class="tool" id="loop" aria-pressed="false" aria-controls="loop-bar" aria-label="تکرار چند میزان">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 7H8a4 4 0 0 0-4 4v1M7 17h9a4 4 0 0 0 4-4v-1" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M15 4l3 3-3 3M9 20l-3-3 3-3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <div class="toolbar__group toolbar__hands">
+          <button type="button" class="hand hand--right" id="hand-right" aria-pressed="true">دست راست</button>
+          <button type="button" class="hand hand--left" id="hand-left" aria-pressed="true">دست چپ</button>
+        </div>
+
+        <label class="tempo">
+          <span class="tempo__label">سرعت</span>
+          <input type="range" id="tempo" min="30" max="150" step="5" value="100" />
+          <output class="tempo__value" id="tempo-value" for="tempo">۱۰۰٪</output>
+        </label>
+      </div>
+
+      <div class="loop-bar" id="loop-bar" hidden>
+        <label class="loop-bar__field">از میزان <select id="loop-from"></select></label>
+        <label class="loop-bar__field">تا میزان <select id="loop-to"></select></label>
+      </div>
+
+      <div class="player__keyboard" id="keyboard"></div>
+    </main>
+
+    <!-- Song list: shown for player.html with no song -->
+    <main class="library" id="library" hidden>
+      <h1 class="library__title">آهنگ‌ها</h1>
+      <p class="library__intro">یک آهنگ را انتخاب کنید تا نت‌هایش روی کیبورد بیفتند و با آن تمرین کنید.</p>
+      <ul class="library__list" id="song-list"></ul>
+    </main>
+
+    <main class="message" id="message" hidden>
+      <p class="message__text" id="message-text"></p>
+      <a class="message__link" href="player.html">دیدن همه‌ی آهنگ‌ها</a>
+    </main>
+
+    <button type="button" class="start" id="start" disabled hidden>
+      <span class="start__title">برای شروع ضربه بزنید</span>
+      <span class="start__note" id="start-note" aria-live="polite">در حال آماده‌سازی…</span>
+    </button>
+  </body>
+</html>

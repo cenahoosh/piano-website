@@ -3,10 +3,9 @@
 import * as piano from './piano.js';
 import { createKeyboard } from './keyboard.js';
 import { MIDDLE_C, noteToMidi, persianNoteName } from './notes.js';
+import { setupStartOverlay } from './start-overlay.js';
 
 const demo = document.getElementById('demo');
-const startButton = document.getElementById('start');
-const startNote = document.getElementById('start-note');
 const readoutName = document.getElementById('readout-name');
 const readoutDetail = document.getElementById('readout-detail');
 const scaleButton = document.getElementById('play-scale');
@@ -102,48 +101,11 @@ chordButton.addEventListener('click', () => play(chordNotes(), 'C4'));
 
 // ── "Tap to start" ──────────────────────────────────────────────────
 
-const START_TEXT = 'مرورگرها تا اولین لمس شما اجازه‌ی پخش صدا نمی‌دهند.';
-const LOADING_TEXT = 'در حال بارگذاری صدای پیانو…';
-const ERROR_TEXT = 'صدای پیانو بارگذاری نشد. اتصال اینترنت را بررسی کنید و دوباره ضربه بزنید.';
-
-function dismissOverlay() {
-  startButton.classList.add('is-hidden');
-  demo.inert = false;
-  setTimeout(() => (startButton.hidden = true), 300);
-  scaleButton.focus({ preventScroll: true });
-}
-
-let engineFailed = false;
-
-async function onStart() {
-  if (engineFailed) return location.reload();
-  // Must happen synchronously inside the tap, before any await.
-  piano.start();
-  startButton.disabled = true;
-  startNote.textContent = LOADING_TEXT;
-  try {
-    await piano.preload();
-    dismissOverlay();
-  } catch (err) {
-    console.error(err);
-    startButton.disabled = false;
-    startNote.textContent = ERROR_TEXT;
-  }
-}
-
-startButton.addEventListener('click', onStart);
-
-piano
-  .loadEngine()
-  .then(() => {
-    startButton.disabled = false;
-    startNote.textContent = START_TEXT;
-    startButton.focus();
-    piano.preload().catch(() => {}); // start fetching samples before the tap
-  })
-  .catch((err) => {
-    console.error(err);
-    engineFailed = true;
-    startNote.textContent = ERROR_TEXT;
-    startButton.disabled = false;
-  });
+setupStartOverlay({
+  button: document.getElementById('start'),
+  note: document.getElementById('start-note'),
+  onReady() {
+    demo.inert = false;
+    scaleButton.focus({ preventScroll: true });
+  },
+});

@@ -52,6 +52,11 @@ A Persian-language piano tutorial website where a teacher publishes songs for st
 - Must work in both **portrait and landscape** on phones. In portrait the keyboard should show a scrollable/zoomable range; in landscape it can show more octaves.
 - Use touch-friendly hit targets, avoid hover-only interactions, and test on narrow widths.
 
+## Pages
+
+- `player.html?song=<name>` — falling-notes practice view for `songs/<name>.json` (`player.html` alone lists the songs). Sound and animation share one clock: the Tone.js Transport, with bpm = 60 × speed so one Transport beat is one song-second (`js/song-player.js`); the canvas (`js/falling-notes.js`) reads the Transport's ticks every frame.
+- `keyboard.html` — keyboard and sound demo.
+
 ## Directory layout
 
 ```

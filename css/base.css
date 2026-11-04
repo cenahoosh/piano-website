@@ -58,6 +58,10 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 button {
   font: inherit;
   color: inherit;
