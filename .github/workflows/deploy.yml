@@ -1,0 +1,63 @@
+# Publishes the site to GitHub Pages on every push to main.
+#
+# One-time setup in the repository: Settings → Pages → Build and deployment →
+# Source: "GitHub Actions".
+#
+# The song converter runs first, so a MusicXML file added to songs-src/ is on the
+# site even if its JSON was not committed. If any score fails to convert, the
+# deploy stops and the previous version of the site stays online.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a deploy halfway; a newer push waits for the current one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Convert songs (MusicXML → JSON)
+        run: node scripts/convert.mjs
+
+      - name: Test the converter
+        run: node --test scripts/convert.test.mjs
+
+      - name: Collect the files the site serves
+        run: |
+          mkdir _site
+          cp -r index.html player.html keyboard.html css js assets songs _site/
+          echo "Site size: $(du -sh _site | cut -f1)"
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

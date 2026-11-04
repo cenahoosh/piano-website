@@ -13,10 +13,10 @@
     <script type="module" src="js/player.js"></script>
   </head>
   <body>
-    <!-- Practice view: shown for player.html?song=<name> -->
+    <!-- Practice view for player.html?song=<name> (without a song, js/player.js goes to the catalog) -->
     <main class="player" id="player" hidden inert>
       <header class="player__header">
-        <a class="player__back" href="player.html" aria-label="همه‌ی آهنگ‌ها">
+        <a class="player__back" href="index.html" aria-label="همه‌ی آهنگ‌ها">
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <div class="player__heading">
@@ -63,16 +63,9 @@
       <div class="player__keyboard" id="keyboard"></div>
     </main>
 
-    <!-- Song list: shown for player.html with no song -->
-    <main class="library" id="library" hidden>
-      <h1 class="library__title">آهنگ‌ها</h1>
-      <p class="library__intro">یک آهنگ را انتخاب کنید تا نت‌هایش روی کیبورد بیفتند و با آن تمرین کنید.</p>
-      <ul class="library__list" id="song-list"></ul>
-    </main>
-
     <main class="message" id="message" hidden>
       <p class="message__text" id="message-text"></p>
-      <a class="message__link" href="player.html">دیدن همه‌ی آهنگ‌ها</a>
+      <a class="message__link" href="index.html">دیدن همه‌ی آهنگ‌ها</a>
     </main>
 
     <button type="button" class="start" id="start" disabled hidden>

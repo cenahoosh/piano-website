@@ -1,0 +1,193 @@
+/* index.html — the song catalog. */
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+/* ── Masthead: title over a strip of keys and felt ───────────────── */
+
+.masthead {
+  padding: calc(36px + env(safe-area-inset-top)) var(--gutter) 0;
+}
+
+.masthead__title,
+.masthead__intro {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.masthead__title {
+  margin-block: 0;
+  font-size: clamp(2.2rem, 11vw, 3.5rem);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.masthead__intro {
+  margin-block: 8px 0;
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+}
+
+/* One octave, repeated: 7 white keys and the 5 black keys at the same offsets as
+   the real keyboard (js/keyboard.js). Pure CSS, so it costs no image download. */
+.masthead__keys {
+  --w: 26px; /* white key width */
+  --b: calc(var(--w) * 0.6); /* black key width */
+  height: 64px;
+  margin: 28px calc(-1 * var(--gutter)) 0;
+  border-top: 6px solid var(--felt);
+  background:
+    linear-gradient(
+        to right,
+        transparent calc(var(--w) * 0.6), var(--ebony) 0, var(--ebony) calc(var(--w) * 0.6 + var(--b)), transparent 0,
+        transparent calc(var(--w) * 1.8), var(--ebony) 0, var(--ebony) calc(var(--w) * 1.8 + var(--b)), transparent 0,
+        transparent calc(var(--w) * 3.58), var(--ebony) 0, var(--ebony) calc(var(--w) * 3.58 + var(--b)), transparent 0,
+        transparent calc(var(--w) * 4.7), var(--ebony) 0, var(--ebony) calc(var(--w) * 4.7 + var(--b)), transparent 0,
+        transparent calc(var(--w) * 5.82), var(--ebony) 0, var(--ebony) calc(var(--w) * 5.82 + var(--b)), transparent 0
+      )
+      0 0 / calc(var(--w) * 7) 60% repeat-x,
+    linear-gradient(to right, transparent calc(var(--w) - 1px), rgb(23 17 14 / 0.3) 0) 0 0 / var(--w) 100% repeat-x,
+    linear-gradient(to bottom, var(--ivory-shade), var(--ivory) 12%);
+}
+
+/* ── Song list ───────────────────────────────────────────────────── */
+
+.catalog {
+  flex: 1;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 28px var(--gutter) 32px;
+}
+
+.levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.level-chip {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--lacquer-edge);
+  border-radius: 999px;
+  background: var(--lacquer-raised);
+  font-size: 0.9rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.level-chip[aria-pressed='true'] {
+  border-color: var(--brass);
+  background: var(--brass);
+  color: var(--ebony);
+  font-weight: 700;
+}
+
+.songs {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.song {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--lacquer-raised);
+}
+
+.song__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.song__details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+.song__level {
+  padding: 0 10px;
+  border: 1px solid var(--brass);
+  border-radius: 999px;
+  color: var(--brass);
+  font-size: 0.8rem;
+  line-height: 1.8;
+}
+
+.song__duration {
+  font-variant-numeric: tabular-nums;
+}
+
+.song__play {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: var(--radius-control);
+  background: var(--ivory);
+  color: var(--ebony);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: inset 0 -4px 0 var(--ivory-shade);
+  touch-action: manipulation;
+}
+
+.song__play:active {
+  box-shadow: inset 0 -1px 0 var(--ivory-shade);
+  transform: translateY(2px);
+}
+
+.song__play svg {
+  width: 16px;
+  height: 16px;
+}
+
+.catalog__status {
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+.catalog__status:empty {
+  display: none;
+}
+
+.footer {
+  padding: 20px var(--gutter) calc(24px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.footer__link {
+  color: var(--brass);
+}
+
+@media (min-width: 700px) {
+  .masthead__keys {
+    --w: 34px;
+    height: 84px;
+  }
+
+  .catalog {
+    padding-top: 40px;
+  }
+}

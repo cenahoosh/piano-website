@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a1812" />
+    <meta name="description" content="آهنگ‌های تمرین پیانو: نت‌ها روی کیبورد می‌افتند و همراهشان می‌نوازید." />
+    <title>تمرین پیانو</title>
+    <link rel="preload" href="assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/catalog.css" />
+    <script type="module" src="js/catalog.js"></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <h1 class="masthead__title">تمرین پیانو</h1>
+      <p class="masthead__intro">آهنگی را انتخاب کنید. نت‌ها روی کیبورد می‌افتند و شما همراهشان می‌نوازید.</p>
+      <div class="masthead__keys" aria-hidden="true"></div>
+    </header>
+
+    <main class="catalog">
+      <div class="levels" id="levels" role="group" aria-label="نمایش بر اساس سطح" hidden></div>
+      <ul class="songs" id="songs" aria-busy="true"></ul>
+      <p class="catalog__status" id="status" role="status">در حال بارگذاری فهرست آهنگ‌ها…</p>
+    </main>
+
+    <footer class="footer">
+      <a class="footer__link" href="keyboard.html">کیبورد آزاد: بدون آهنگ بنوازید</a>
+    </footer>
+  </body>
+</html>

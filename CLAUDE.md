@@ -15,6 +15,7 @@ A Persian-language piano tutorial website where a teacher publishes songs for st
 - No framework, no bundler, no build step. Every file in the repo is served as-is.
 - Hosted as a static site on **GitHub Pages**. Use relative paths so the site works from a project sub-path.
 - Node.js is used only for offline tooling (the song converter), never at runtime.
+- Deployment: `.github/workflows/deploy.yml` runs on every push to `main` — it converts the songs, runs the converter tests, and publishes `index.html`, `player.html`, `keyboard.html`, `css/`, `js/`, `assets/` and `songs/` to GitHub Pages (Settings → Pages → Source must be "GitHub Actions"). A score that fails to convert stops the deploy and leaves the previous site online.
 
 ## Sound
 
@@ -54,7 +55,8 @@ A Persian-language piano tutorial website where a teacher publishes songs for st
 
 ## Pages
 
-- `player.html?song=<name>` — falling-notes practice view for `songs/<name>.json` (`player.html` alone lists the songs). Sound and animation share one clock: the Tone.js Transport, with bpm = 60 × speed so one Transport beat is one song-second (`js/song-player.js`); the canvas (`js/falling-notes.js`) reads the Transport's ticks every frame.
+- `index.html` — catalog of the songs in `songs/index.json` (title, composer, level, duration, a button to the player).
+- `player.html?song=<name>` — falling-notes practice view for `songs/<name>.json` (without a song it redirects to the catalog). Sound and animation share one clock: the Tone.js Transport, with bpm = 60 × speed so one Transport beat is one song-second (`js/song-player.js`); the canvas (`js/falling-notes.js`) reads the Transport's ticks every frame.
 - `keyboard.html` — keyboard and sound demo.
 
 ## Directory layout

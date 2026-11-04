@@ -1,5 +1,5 @@
 // player.html?song=<name> — falling-notes practice view.
-// player.html (no song)    — list of songs from songs/index.json.
+// Without a song it goes to the catalog (index.html).
 
 import * as piano from './piano.js';
 import { createKeyboard } from './keyboard.js';
@@ -10,57 +10,10 @@ import { MIDDLE_C, noteToMidi, toPersianDigits } from './notes.js';
 
 const $ = (id) => document.getElementById(id);
 
-function formatDuration(seconds) {
-  const s = Math.round(seconds);
-  return toPersianDigits(`${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`);
-}
-
 function showMessage(text) {
   $('player').hidden = true;
   $('message-text').textContent = text;
   $('message').hidden = false;
-}
-
-// ─────────────────────────────────────────────────────────────────────
-// Song list
-// ─────────────────────────────────────────────────────────────────────
-
-async function showLibrary() {
-  $('library').hidden = false;
-  const list = $('song-list');
-  try {
-    const response = await fetch('songs/index.json', { cache: 'no-cache' });
-    if (!response.ok) throw new Error(response.statusText);
-    const songs = await response.json();
-    if (!songs.length) {
-      list.innerHTML = '<li class="library__intro">هنوز آهنگی اضافه نشده است.</li>';
-      return;
-    }
-    for (const song of songs) {
-      const item = document.createElement('li');
-      const link = document.createElement('a');
-      link.className = 'song-link';
-      link.href = `player.html?song=${encodeURIComponent(song.id)}`;
-      const title = document.createElement('span');
-      title.className = 'song-link__title';
-      title.textContent = song.title;
-      const meta = document.createElement('span');
-      meta.className = 'song-link__meta';
-      meta.textContent = [song.composer, formatDuration(song.duration)].filter(Boolean).join('، ');
-      link.append(title, meta);
-      if (song.level !== null && song.level !== undefined) {
-        const level = document.createElement('span');
-        level.className = 'song-link__level';
-        level.textContent = `سطح ${toPersianDigits(song.level)}`;
-        link.append(level);
-      }
-      item.append(link);
-      list.append(item);
-    }
-  } catch (err) {
-    console.error(err);
-    list.innerHTML = '<li class="library__intro">فهرست آهنگ‌ها بارگذاری نشد. اتصال اینترنت را بررسی کنید و صفحه را دوباره باز کنید.</li>';
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -360,4 +313,4 @@ async function showPlayer(id) {
 
 const songId = new URLSearchParams(location.search).get('song');
 if (songId) showPlayer(songId);
-else showLibrary();
+else location.replace('index.html');
