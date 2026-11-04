@@ -24,19 +24,21 @@ A Persian-language piano tutorial website where a teacher publishes songs for st
 
 ## Songs pipeline
 
-1. The teacher writes each song in **MuseScore** and exports it as **MusicXML** into `/songs-src/`.
-2. A Node script converts each MusicXML file into a JSON file in `/songs/`.
+1. The teacher writes each song in **MuseScore** and exports it as **MusicXML** (`.musicxml` or compressed `.mxl`) into `/songs-src/`.
+2. `node scripts/convert.mjs` converts every file into `/songs/<name>.json` and writes `/songs/index.json` (`[{ id, file, title, composer, level, duration }]`). Commit the generated JSON — the site has no build step. Tests: `node --test scripts/convert.test.mjs` (they also fail if the committed JSON is stale).
 3. Each note in the JSON has the shape:
 
    ```json
-   { "note": "C4", "time": 0.0, "duration": 0.5, "hand": "right", "velocity": 0.8 }
+   { "note": "C4", "time": 0.0, "duration": 0.5, "hand": "right", "velocity": 0.8, "measure": 1, "beat": 1 }
    ```
 
-   - `note`: scientific pitch name (e.g. `C4`, `F#3`).
-   - `time` / `duration`: in seconds.
+   - `note`: scientific pitch name, spelled with sharps (e.g. `C4`, `F#3`).
+   - `time` / `duration`: in seconds at the written tempo. Repeats are already expanded into playing order; ties are merged.
    - `hand`: `"right"` or `"left"`.
-   - `velocity`: 0–1.
+   - `velocity`: 0–1, from the score's dynamics (mf ≈ 0.63 when none are marked).
+   - `measure`: the measure number printed in the score; `beat`: 1-based, in the time signature's beat unit (2.5 = halfway through beat 2).
 4. Hand assignment comes from the MusicXML staff: **staff 1 = right hand**, **staff 2 = left hand**.
+5. A song file also has `title`, `composer`, `level`, `duration`, `tempo`, `timeSignature`, `tempos` and `measures` (start time of each measure in playing order). Title and composer come from MuseScore's score properties; `level` comes from an optional sidecar `songs-src/<name>.meta.json` such as `{ "level": 2 }` (which may also override `title` / `composer`).
 
 ## Visual conventions
 
@@ -54,7 +56,8 @@ A Persian-language piano tutorial website where a teacher publishes songs for st
 
 ```
 /songs-src/     MusicXML exports from MuseScore (source of truth for songs)
-/songs/         Generated JSON songs (output of the converter script)
+/songs/         Generated JSON songs (output of scripts/convert.mjs)
+/scripts/       Offline Node tooling (song converter + tests)
 /assets/piano/  Self-hosted Salamander Grand Piano samples
 /js/            ES module source files
 /css/           Stylesheets
