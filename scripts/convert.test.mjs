@@ -371,6 +371,20 @@ test('reads compressed .mxl files and sidecar metadata; writes index.json sorted
   }
 });
 
+test('deleting a score removes its generated files (and nothing else)', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'songs-'));
+  try {
+    await mkdirCopy(ODE, dir);
+    const { mkdir } = await import('node:fs/promises');
+    await mkdir(path.join(dir, 'out'));
+    for (const f of ['old-song.json', 'old-song.musicxml', 'notes.txt']) await writeFile(path.join(dir, 'out', f), 'x');
+    await convertAll({ srcDir: path.join(dir, 'src'), outDir: path.join(dir, 'out'), log: quiet });
+    assert.deepEqual((await readdir(path.join(dir, 'out'))).sort(), ['index.json', 'notes.txt', 'ode-to-joy.json', 'ode-to-joy.musicxml']);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test('a broken file is reported and index.json is left alone', async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'songs-'));
   try {

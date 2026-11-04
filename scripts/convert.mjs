@@ -7,6 +7,7 @@
 //   songs/<name>.json      one file per song (see "Output" below)
 //   songs/<name>.musicxml  the score itself (unzipped), for the sheet-music view
 //   songs/index.json       [{ id, file, title, composer, level, duration }]
+// and removes the generated files of scores that were deleted from songs-src/.
 //
 // No dependencies: runs on a plain Node.js (18+) install.
 //
@@ -41,7 +42,7 @@
 //   - beat: 1-based position in the measure, counted in the time signature's
 //     beat unit (quarters in 4/4, eighths in 6/8). 2.5 = halfway through beat 2.
 
-import { readFile, writeFile, readdir, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, readdir, mkdir, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { inflateRawSync } from 'node:zlib';
@@ -837,6 +838,14 @@ export async function convertAll({ srcDir = path.join(ROOT, 'songs-src'), outDir
     );
     await writeFile(path.join(outDir, 'index.json'), JSON.stringify(index, null, 2) + '\n');
     log.log(`\nWrote songs/index.json (${index.length} song${index.length === 1 ? '' : 's'}).`);
+
+    // A score deleted from songs-src/ takes its generated files with it.
+    for (const file of await readdir(outDir)) {
+      const match = /^(.+)\.(json|musicxml)$/.exec(file);
+      if (!match || file === 'index.json' || seen.has(match[1])) continue;
+      await unlink(path.join(outDir, file));
+      log.log(`Removed songs/${file} (its score is no longer in songs-src/).`);
+    }
   }
   return { converted: index.length, failed };
 }
