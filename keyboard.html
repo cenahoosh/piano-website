@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a1812" />
+    <title>کیبورد پیانو</title>
+    <link rel="preload" href="assets/fonts/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/keyboard.css" />
+    <link rel="stylesheet" href="css/keyboard-demo.css" />
+    <script type="module" src="js/keyboard-demo.js"></script>
+  </head>
+  <body>
+    <main class="demo" id="demo" inert>
+      <header class="demo__header">
+        <h1 class="demo__title">کیبورد پیانو</h1>
+        <p class="demo__intro">
+          کلیدها را لمس کنید تا صدایشان را بشنوید. برای رفتن به کلیدهای بم‌تر یا زیرتر، نوار بالای
+          کیبورد را بکشید.
+        </p>
+        <ul class="legend">
+          <li class="legend__item legend__item--right">دست راست</li>
+          <li class="legend__item legend__item--left">دست چپ</li>
+        </ul>
+      </header>
+
+      <section class="readout" aria-hidden="true">
+        <p class="readout__name" id="readout-name">دو<span class="readout__octave">۴</span></p>
+        <p class="readout__detail" id="readout-detail">دوی میانی را با نقطه‌ی طلایی روی کلیدش پیدا کنید.</p>
+      </section>
+
+      <div class="demo__actions">
+        <button type="button" class="demo__button" id="play-scale" data-label="گام دو ماژور">گام دو ماژور</button>
+        <button type="button" class="demo__button" id="play-chords" data-label="تست آکورد">تست آکورد</button>
+      </div>
+
+      <div id="keyboard" class="demo__keyboard"></div>
+    </main>
+
+    <button type="button" class="start" id="start" disabled>
+      <span class="start__title">برای شروع ضربه بزنید</span>
+      <span class="start__note" id="start-note" aria-live="polite">در حال آماده‌سازی…</span>
+    </button>
+  </body>
+</html>

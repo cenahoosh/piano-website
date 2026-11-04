@@ -1,0 +1,235 @@
+/* 88-key keyboard component (see js/keyboard.js). */
+
+.keyboard {
+  /* Width of one white key. Phones in portrait show ~1.5 octaves at a playable size,
+     landscape ~4 octaves, wide desktops all 88 keys. --zoom is set by the zoom buttons. */
+  --wk-base: clamp(34px, calc(100vw / 11), 56px);
+  --wk: calc(var(--wk-base) * var(--zoom, 1));
+  --kh: clamp(150px, 34svh, 280px); /* white key height */
+  --bk-ratio: 0.6; /* black key width ÷ white key width (matches BLACK_WIDTH in JS) */
+  --bk-height: 0.62;
+
+  direction: ltr; /* low notes on the left, whatever the page direction */
+  display: grid;
+  gap: 10px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+@media (orientation: landscape) {
+  .keyboard {
+    --wk-base: clamp(26px, calc(100vw / 29), 48px);
+    --kh: clamp(120px, 46svh, 300px);
+  }
+}
+
+@media (orientation: landscape) and (min-width: 1200px) {
+  .keyboard {
+    --wk-base: calc((100vw - 2 * var(--gutter)) / 52);
+    --kh: clamp(150px, 30svh, 240px);
+  }
+}
+
+/* ── Mini-map and zoom ───────────────────────────────────────────── */
+
+.keyboard__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline: var(--gutter);
+}
+
+.keyboard__zoom {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--lacquer-edge);
+  border-radius: 50%;
+  background: var(--lacquer-raised);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.keyboard__zoom:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.keyboard__map {
+  position: relative;
+  flex: 1;
+  height: 30px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--ebony);
+  cursor: grab;
+  touch-action: none;
+}
+
+.keyboard__map-keys {
+  --wk: calc(100% / 52);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+}
+
+.keyboard__map-keys .key--white {
+  flex: 1 1 0;
+  border-right: 1px solid var(--ebony);
+  background: var(--ivory-shade);
+}
+
+.keyboard__map-keys .key--black {
+  position: absolute;
+  top: 0;
+  left: calc(var(--wk) * var(--x));
+  width: calc(var(--wk) * var(--bk-ratio));
+  height: 58%;
+  background: var(--ebony);
+}
+
+.keyboard__map-keys .key[data-hand='right'] {
+  background: var(--hand-right);
+}
+
+.keyboard__map-keys .key[data-hand='left'] {
+  background: var(--hand-left);
+}
+
+.keyboard__map-window {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: 2px solid var(--brass);
+  border-radius: 6px;
+  background: rgb(205 166 90 / 0.18);
+  pointer-events: none;
+}
+
+/* Wide screens show all 88 keys: nothing to scroll or zoom. */
+.keyboard--fits .keyboard__bar {
+  display: none;
+}
+
+/* ── Keys ────────────────────────────────────────────────────────── */
+
+.keyboard__scroller {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none; /* the mini-map is the scrollbar */
+  background: var(--ebony);
+  border-top: 7px solid var(--felt);
+  box-shadow: inset 0 6px 6px -4px rgb(0 0 0 / 0.6);
+}
+
+.keyboard__scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.keyboard__keys {
+  position: relative;
+  display: flex;
+  width: max-content;
+  height: var(--kh);
+  margin-inline: auto; /* centred when every key fits */
+  touch-action: none; /* swipes play notes instead of scrolling */
+}
+
+.keyboard__keys .key {
+  --lit: transparent;
+  cursor: pointer;
+}
+
+.keyboard__keys .key--white {
+  position: relative;
+  flex: none;
+  width: var(--wk);
+  height: 100%;
+  border-right: 1px solid rgb(23 17 14 / 0.25);
+  border-radius: 0 0 5px 5px;
+  background: linear-gradient(to bottom, var(--ivory-shade), var(--ivory) 9%);
+  box-shadow: inset 0 -6px 0 rgb(0 0 0 / 0.08);
+}
+
+.keyboard__keys .key--black {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: calc(var(--wk) * var(--x));
+  width: calc(var(--wk) * var(--bk-ratio));
+  height: calc(var(--kh) * var(--bk-height));
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(to bottom, #2b2320, var(--ebony) 85%, #3a302b);
+  box-shadow:
+    inset 0 -8px 0 rgb(255 255 255 / 0.07),
+    1px 3px 3px rgb(0 0 0 / 0.45);
+}
+
+/* Pressed: the key dips a little (front lip gets shorter). */
+.keyboard__keys .key--white.is-down {
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.1);
+}
+
+.keyboard__keys .key--black.is-down {
+  box-shadow:
+    inset 0 -3px 0 rgb(255 255 255 / 0.07),
+    1px 1px 2px rgb(0 0 0 / 0.45);
+}
+
+/* Sounding: the key fills with the hand colour. */
+.keyboard__keys .key[data-hand='right'] {
+  --lit: var(--hand-right);
+  --lit-deep: var(--hand-right-deep);
+}
+
+.keyboard__keys .key[data-hand='left'] {
+  --lit: var(--hand-left);
+  --lit-deep: var(--hand-left-deep);
+}
+
+.keyboard__keys .key--white[data-hand] {
+  background: linear-gradient(to bottom, var(--lit-deep), var(--lit) 14%);
+}
+
+.keyboard__keys .key--black[data-hand] {
+  background: linear-gradient(to bottom, var(--lit-deep), var(--lit) 80%);
+}
+
+.key__label {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 12px;
+  direction: rtl;
+  font-size: clamp(0.62rem, calc(var(--wk) * 0.3), 0.85rem);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  color: rgb(23 17 14 / 0.55);
+  pointer-events: none;
+}
+
+.key--middle-c .key__label {
+  color: var(--ebony);
+}
+
+/* A small brass mark under middle C, so students can always find it. */
+.key--middle-c::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(12px + 1.4em);
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--brass);
+  font-size: clamp(0.62rem, calc(var(--wk) * 0.3), 0.85rem);
+}
+
+.key[data-hand] .key__label {
+  color: #fff;
+}

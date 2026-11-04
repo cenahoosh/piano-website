@@ -1,0 +1,88 @@
+/* Shared tokens, font and resets for every page. */
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../assets/fonts/Vazirmatn-Variable.woff2') format('woff2-variations'),
+    url('../assets/fonts/Vazirmatn-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Hands — the only place these colours are defined. */
+  --hand-right: #2f80ed;
+  --hand-left: #f2891d;
+  --hand-right-deep: #1c5fc0;
+  --hand-left-deep: #c96a0c;
+
+  /* The instrument: lacquered rosewood case, ivory and ebony keys, key-slip felt, brass. */
+  --lacquer: #2a1812;
+  --lacquer-raised: #3a2219;
+  --lacquer-edge: #4d2f23;
+  --felt: #7a1e2a;
+  --ivory: #f5efe1;
+  --ivory-shade: #ddd3bf;
+  --ebony: #17110e;
+  --brass: #cda65a;
+
+  /* Text on lacquer */
+  --ink: #f3e7d9;
+  --ink-muted: #b9a08d;
+
+  --font: 'Vazirmatn', system-ui, sans-serif;
+  --gutter: 16px;
+  --radius-control: 12px;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--lacquer);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--brass);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
