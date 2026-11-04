@@ -1,4 +1,7 @@
 {
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
+  },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
@@ -6,8 +9,5 @@
         "repo": "anthropics/claude-plugins-official"
       }
     }
-  },
-  "enabledPlugins": {
-    "frontend-design@claude-plugins-official": true
   }
 }
